@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RSA Encryption and Decryption | Virtual Cryptography Lab</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    .rsa-shell { max-width: 1180px; margin: 0 auto; padding: 28px 18px 60px; }
+    .hero { background: linear-gradient(135deg,#8f6854,#b8876d); color:#fff; border-radius:18px; padding:28px; box-shadow:0 12px 28px rgba(0,0,0,.10); }
+    .hero h1 { margin:0 0 8px; font-size:clamp(1.7rem,4vw,2.6rem); }
+    .hero p { margin:0; opacity:.95; line-height:1.6; }
+    .tabs { display:flex; gap:8px; flex-wrap:wrap; margin:20px 0; }
+    .tab-btn { border:0; background:#eee2da; color:#5e4538; padding:11px 16px; border-radius:999px; cursor:pointer; font-weight:700; }
+    .tab-btn.active { background:#8f6854; color:#fff; }
+    .panel { display:none; }
+    .panel.active { display:block; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+    .card { background:#fff; border:1px solid #eaded6; border-radius:16px; padding:20px; box-shadow:0 6px 20px rgba(65,45,35,.06); }
+    .card h2,.card h3 { color:#5e4538; margin-top:0; }
+    .formula { background:#f7f1ed; border-left:4px solid #8f6854; padding:14px 16px; border-radius:8px; margin:12px 0; font-family:ui-monospace,monospace; overflow:auto; }
+    .steps li { margin:9px 0; line-height:1.5; }
+    label { display:block; font-weight:700; margin:12px 0 6px; color:#5e4538; }
+    input, textarea, select { width:100%; box-sizing:border-box; border:1px solid #d9c9bf; border-radius:9px; padding:11px 12px; font:inherit; background:#fff; }
+    textarea { min-height:100px; resize:vertical; }
+    .row { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .row3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    button.primary, button.secondary { border:0; border-radius:9px; padding:11px 15px; cursor:pointer; font-weight:800; }
+    button.primary { background:#8f6854; color:#fff; }
+    button.secondary { background:#eee2da; color:#5e4538; }
+    button:disabled { opacity:.55; cursor:not-allowed; }
+    .actions { display:flex; gap:9px; flex-wrap:wrap; margin-top:14px; }
+    .keybox { background:#fbf8f6; border:1px dashed #cdb8aa; border-radius:12px; padding:14px; word-break:break-word; }
+    .keybox strong { color:#5e4538; }
+    .status { margin-top:12px; padding:10px 12px; border-radius:9px; background:#f3eee9; }
+    .status.ok { background:#e8f5ea; color:#215b2c; }
+    .status.err { background:#fdeaea; color:#8b2525; }
+    .table-wrap { overflow:auto; }
+    table { width:100%; border-collapse:collapse; }
+    th,td { padding:10px; border-bottom:1px solid #eaded6; text-align:left; vertical-align:top; }
+    th { color:#5e4538; background:#faf6f3; }
+    .quiz-q { margin:18px 0; padding:16px; background:#faf7f4; border-radius:12px; }
+    .option { display:flex; gap:9px; align-items:flex-start; margin:8px 0; font-weight:400; color:#333; }
+    .option input { width:auto; margin-top:4px; }
+    .score { font-size:1.1rem; font-weight:800; margin-top:15px; }
+    .footer-note { text-align:center; color:#76675e; margin-top:28px; font-size:.9rem; }
+    code { background:#f1ebe7; padding:2px 5px; border-radius:4px; }
+    @media(max-width:760px) { .grid,.row,.row3 { grid-template-columns:1fr; } .hero { padding:22px; } }
+  </style>
+</head>
+<body>
+  <main class="rsa-shell">
+    <section class="hero">
+      <h1>RSA Encryption and Decryption</h1>
+      <p>Virtual Cryptography Laboratory · Generate a key pair, encrypt a message, decrypt it, and inspect the mathematics behind each step.</p>
+    </section>
+
+    <nav class="tabs" aria-label="Experiment sections">
+      <button class="tab-btn active" data-tab="aim">Aim & Theory</button>
+      <button class="tab-btn" data-tab="procedure">Procedure</button>
+      <button class="tab-btn" data-tab="lab">Interactive Lab</button>
+      <button class="tab-btn" data-tab="assessment">Assessment</button>
+      <button class="tab-btn" data-tab="quiz">Quiz</button>
+      <button class="tab-btn" data-tab="references">References</button>
+    </nav>
+
+    <section id="aim" class="panel active">
+      <div class="grid">
+        <article class="card">
+          <h2>Aim</h2>
+          <p>To understand and simulate RSA public-key cryptography by generating an RSA key pair and using it to encrypt and decrypt messages.</p>
+        </article>
+        <article class="card">
+          <h2>Objectives</h2>
+          <ul class="steps">
+            <li>Generate RSA public and private keys.</li>
+            <li>Understand the roles of <code>p</code>, <code>q</code>, <code>n</code>, <code>φ(n)</code>, <code>e</code>, and <code>d</code>.</li>
+            <li>Encrypt a message using the public key.</li>
+            <li>Decrypt the ciphertext using the private key.</li>
+            <li>Observe how changing the key parameters changes the ciphertext.</li>
+          </ul>
+        </article>
+      </div>
+      <article class="card" style="margin-top:18px">
+        <h2>RSA Theory</h2>
+        <p>RSA is a public-key cryptosystem. Two related keys are used: a public key for encryption and a private key for decryption.</p>
+        <div class="formula">
+          Choose primes p and q<br>
+          n = p × q<br>
+          φ(n) = (p − 1)(q − 1)<br>
+          Choose e such that 1 &lt; e &lt; φ(n) and gcd(e, φ(n)) = 1<br>
+          Find d such that e × d ≡ 1 (mod φ(n))<br>
+          Public key = (e, n)<br>
+          Private key = (d, n)
+        </div>
+        <p>For a message represented by an integer <code>m</code> with <code>0 ≤ m &lt; n</code>:</p>
+        <div class="formula">Encryption: c = m<sup>e</sup> mod n<br>Decryption: m = c<sup>d</sup> mod n</div>
+        <p><strong>Educational note:</strong> this browser simulation intentionally uses small/toy RSA parameters so the arithmetic can be visualized. It is not suitable for protecting real data.</p>
+      </article>
+    </section>
+
+    <section id="procedure" class="panel">
+      <article class="card">
+        <h2>Step-by-step Procedure</h2>
+        <ol class="steps">
+          <li>Enter two distinct prime numbers <code>p</code> and <code>q</code>, or click <strong>Generate Example Keys</strong>.</li>
+          <li>Compute <code>n = p × q</code>.</li>
+          <li>Compute Euler's totient <code>φ(n) = (p−1)(q−1)</code>.</li>
+          <li>Choose a valid public exponent <code>e</code> coprime to <code>φ(n)</code>.</li>
+          <li>Compute the private exponent <code>d</code>, the modular inverse of <code>e</code> modulo <code>φ(n)</code>.</li>
+          <li>The public key is <code>(e,n)</code>; the private key is <code>(d,n)</code>.</li>
+          <li>Enter a short message and click <strong>Encrypt</strong>. Each UTF-8 byte is converted to an integer and encrypted.</li>
+          <li>Click <strong>Decrypt</strong> to recover the original bytes and message.</li>
+          <li>Use <strong>Reset</strong> to repeat the experiment with different values.</li>
+        </ol>
+      </article>
+      <article class="card" style="margin-top:18px">
+        <h2>Expected Observation</h2>
+        <p>The public key can be used to transform the message into ciphertext. The corresponding private key reverses that transformation, returning the original message.</p>
+        <div class="formula">Original message → UTF-8 bytes → RSA encryption → Ciphertext → RSA decryption → Original bytes → Original message</div>
+      </article>
+    </section>
+
+    <section id="lab" class="panel">
+      <div class="grid">
+        <article class="card">
+          <h2>1. Key Generation</h2>
+          <div class="row">
+            <div>
+              <label for="p">Prime p</label>
+              <input id="p" type="number" min="2" step="1" value="61">
+            </div>
+            <div>
+              <label for="q">Prime q</label>
+              <input id="q" type="number" min="2" step="1" value="53">
+            </div>
+          </div>
+          <label for="e">Public exponent e (optional)</label>
+          <input id="e" type="number" min="2" step="1" placeholder="Auto-select if blank">
+          <div class="actions">
+            <button class="primary" id="generateBtn">Generate Keys</button>
+            <button class="secondary" id="exampleBtn">Generate Example Keys</button>
+          </div>
+          <div id="keyStatus" class="status">Generate keys to begin.</div>
+        </article>
+
+        <article class="card">
+          <h2>2. Generated Values</h2>
+          <div class="row">
+            <div class="keybox"><strong>n</strong><div id="nOut">—</div></div>
+            <div class="keybox"><strong>φ(n)</strong><div id="phiOut">—</div></div>
+          </div>
+          <div class="row" style="margin-top:12px">
+            <div class="keybox"><strong>Public Key (e, n)</strong><div id="pubOut">—</div></div>
+            <div class="keybox"><strong>Private Key (d, n)</strong><div id="privOut">—</div></div>
+          </div>
+          <div class="keybox" style="margin-top:12px"><strong>Key-generation explanation</strong><div id="keySteps">—</div></div>
+        </article>
+      </div>
+
+      <div class="grid" style="margin-top:18px">
+        <article class="card">
+          <h2>3. Encrypt</h2>
+          <label for="message">Plaintext message</label>
+          <textarea id="message" placeholder="Enter a short message, e.g. HELLO RSA">HELLO RSA</textarea>
+          <div class="actions">
+            <button class="primary" id="encryptBtn">Encrypt</button>
+            <button class="secondary" id="clearCipherBtn">Clear Ciphertext</button>
+          </div>
+          <label for="ciphertext">Ciphertext</label>
+          <textarea id="ciphertext" readonly placeholder="Encrypted byte values will appear here"></textarea>
+        </article>
+
+        <article class="card">
+          <h2>4. Decrypt</h2>
+          <p>Decrypt the ciphertext produced above using the generated private key.</p>
+          <div class="actions">
+            <button class="primary" id="decryptBtn">Decrypt</button>
+          </div>
+          <label for="decrypted">Recovered plaintext</label>
+          <textarea id="decrypted" readonly placeholder="Decrypted message will appear here"></textarea>
+          <div id="decryptStatus" class="status">Waiting for ciphertext.</div>
+        </article>
+      </div>
+
+      <article class="card" style="margin-top:18px">
+        <h2>5. Byte-level Visualization</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Index</th><th>Byte / character</th><th>m</th><th>c = m<sup>e</sup> mod n</th><th>Recovered m</th><th>Recovered character</th></tr></thead>
+            <tbody id="traceBody"><tr><td colspan="6">Encrypt a message to view the calculation trace.</td></tr></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section id="assessment" class="panel">
+      <div class="grid">
+        <article class="card">
+          <h2>Evaluation Questions</h2>
+          <ol class="steps">
+            <li>What is the purpose of selecting two prime numbers in RSA?</li>
+            <li>How is <code>φ(n)</code> calculated for the two-prime RSA setup?</li>
+            <li>What mathematical relationship must hold between <code>e</code> and <code>φ(n)</code>?</li>
+            <li>How is <code>d</code> obtained from <code>e</code> and <code>φ(n)</code>?</li>
+            <li>Which key is used for encryption in this experiment and which key is used for decryption?</li>
+            <li>Why must the message integer be smaller than <code>n</code>?</li>
+          </ol>
+        </article>
+        <article class="card">
+          <h2>Test Cases</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Test</th><th>p</th><th>q</th><th>e</th><th>Input</th><th>Expected</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>61</td><td>53</td><td>17</td><td>HELLO</td><td>Decrypted output = HELLO</td></tr>
+                <tr><td>2</td><td>61</td><td>53</td><td>Auto</td><td>RSA</td><td>Decrypted output = RSA</td></tr>
+                <tr><td>3</td><td>47</td><td>71</td><td>79</td><td>TEST</td><td>Decrypted output = TEST</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="quiz" class="panel">
+      <article class="card">
+        <h2>Quiz</h2>
+        <form id="quizForm">
+          <div class="quiz-q"><strong>1. Which key is normally shared openly?</strong>
+            <label class="option"><input type="radio" name="q1" value="a"> Private key</label>
+            <label class="option"><input type="radio" name="q1" value="b"> Public key</label>
+            <label class="option"><input type="radio" name="q1" value="c"> φ(n)</label>
+          </div>
+          <div class="quiz-q"><strong>2. If p = 5 and q = 11, what is n?</strong>
+            <label class="option"><input type="radio" name="q2" value="a"> 16</label>
+            <label class="option"><input type="radio" name="q2" value="b"> 55</label>
+            <label class="option"><input type="radio" name="q2" value="c"> 44</label>
+          </div>
+          <div class="quiz-q"><strong>3. What does d represent?</strong>
+            <label class="option"><input type="radio" name="q3" value="a"> The modular inverse of e modulo φ(n)</label>
+            <label class="option"><input type="radio" name="q3" value="b"> p + q</label>
+            <label class="option"><input type="radio" name="q3" value="c"> The ciphertext</label>
+          </div>
+          <div class="quiz-q"><strong>4. Which operation is used to encrypt m?</strong>
+            <label class="option"><input type="radio" name="q4" value="a"> m + e</label>
+            <label class="option"><input type="radio" name="q4" value="b"> m × e</label>
+            <label class="option"><input type="radio" name="q4" value="c"> m<sup>e</sup> mod n</label>
+          </div>
+          <div class="quiz-q"><strong>5. Why is this small RSA simulator not suitable for real security?</strong>
+            <label class="option"><input type="radio" name="q5" value="a"> It uses toy-sized parameters and simplified textbook RSA</label>
+            <label class="option"><input type="radio" name="q5" value="b"> RSA cannot encrypt messages</label>
+            <label class="option"><input type="radio" name="q5" value="c"> Public keys cannot be generated</label>
+          </div>
+          <button type="button" class="primary" id="quizBtn">Submit Quiz</button>
+          <div id="quizScore" class="score"></div>
+        </form>
+      </article>
+    </section>
+
+    <section id="references" class="panel">
+      <article class="card">
+        <h2>References</h2>
+        <ul class="steps">
+          <li>R. L. Rivest, A. Shamir, L. Adleman, “A Method for Obtaining Digital Signatures and Public-Key Cryptosystems,” Communications of the ACM, 1978.</li>
+          <li>William Stallings, <em>Cryptography and Network Security: Principles and Practice</em>.</li>
+          <li>National Institute of Standards and Technology (NIST), cryptographic standards and guidance: https://www.nist.gov/</li>
+        </ul>
+        <p><strong>Module implementation:</strong> plain HTML, CSS and JavaScript; no external library is required.</p>
+      </article>
+    </section>
+
+    <p class="footer-note">RSA Virtual Lab · Educational simulation · Use sufficiently small values for classroom demonstration.</p>
+  </main>
+  <script src="../../js/common.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
