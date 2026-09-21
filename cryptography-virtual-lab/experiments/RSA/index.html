@@ -6,45 +6,186 @@
   <title>RSA Encryption and Decryption | Virtual Cryptography Lab</title>
   <link rel="stylesheet" href="../../css/style.css">
   <style>
-    .rsa-shell { max-width: 1180px; margin: 0 auto; padding: 28px 18px 60px; }
-    .hero { background: linear-gradient(135deg,#8f6854,#b8876d); color:#fff; border-radius:18px; padding:28px; box-shadow:0 12px 28px rgba(0,0,0,.10); }
-    .hero h1 { margin:0 0 8px; font-size:clamp(1.7rem,4vw,2.6rem); }
-    .hero p { margin:0; opacity:.95; line-height:1.6; }
-    .tabs { display:flex; gap:8px; flex-wrap:wrap; margin:20px 0; }
-    .tab-btn { border:0; background:#eee2da; color:#5e4538; padding:11px 16px; border-radius:999px; cursor:pointer; font-weight:700; }
-    .tab-btn.active { background:#8f6854; color:#fff; }
+    .rsa-shell { max-width: 1180px; margin: 0 auto; padding: 34px 20px 64px; }
+    .hero { background:#172b42; color:#fff; border:1px solid #0c1a2a; border-top:6px solid #c49a4a; border-radius:3px; padding:30px 32px; box-shadow:0 8px 0 rgba(23,43,66,.12); }
+    .hero h1 { margin:0 0 8px; font-family:Georgia,serif; font-size:clamp(1.8rem,4vw,2.8rem); letter-spacing:.02em; }
+    .hero p { margin:0; color:#dce4eb; line-height:1.65; }
+    .tabs { display:flex; gap:0; flex-wrap:wrap; margin:24px 0; border-bottom:2px solid #c49a4a; }
+    .tab-btn { border:1px solid #c9bda7; border-bottom:0; background:#e8dfcf; color:#263b51; padding:11px 16px; border-radius:3px 3px 0 0; cursor:pointer; font-weight:700; }
+    .tab-btn + .tab-btn { border-left:0; }
+    .tab-btn.active { background:#263b51; color:#fff; border-color:#263b51; }
     .panel { display:none; }
     .panel.active { display:block; }
     .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
-    .card { background:#fff; border:1px solid #eaded6; border-radius:16px; padding:20px; box-shadow:0 6px 20px rgba(65,45,35,.06); }
-    .card h2,.card h3 { color:#5e4538; margin-top:0; }
-    .formula { background:#f7f1ed; border-left:4px solid #8f6854; padding:14px 16px; border-radius:8px; margin:12px 0; font-family:ui-monospace,monospace; overflow:auto; }
+    .card { background:#fffdf8; border:1px solid #c9bda7; border-radius:3px; padding:22px; box-shadow:4px 4px 0 rgba(38,59,81,.08); }
+    .card h2,.card h3 { color:#263b51; margin-top:0; font-family:Georgia,serif; }
+    .formula { background:#f1eadc; border:1px solid #d7c9ae; border-left:5px solid #c49a4a; padding:14px 16px; border-radius:2px; margin:12px 0; font-family:ui-monospace,monospace; overflow:auto; }
     .steps li { margin:9px 0; line-height:1.5; }
-    label { display:block; font-weight:700; margin:12px 0 6px; color:#5e4538; }
-    input, textarea, select { width:100%; box-sizing:border-box; border:1px solid #d9c9bf; border-radius:9px; padding:11px 12px; font:inherit; background:#fff; }
+    label { display:block; font-weight:700; margin:12px 0 6px; color:#263b51; }
+    input, textarea, select { width:100%; box-sizing:border-box; border:1px solid #bcae94; border-radius:2px; padding:11px 12px; font:inherit; background:#fff; color:#26312f; }
+    input:focus, textarea:focus, select:focus { outline:3px solid rgba(196,154,74,.3); border-color:#a47729; }
     textarea { min-height:100px; resize:vertical; }
     .row { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
     .row3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
-    button.primary, button.secondary { border:0; border-radius:9px; padding:11px 15px; cursor:pointer; font-weight:800; }
-    button.primary { background:#8f6854; color:#fff; }
-    button.secondary { background:#eee2da; color:#5e4538; }
+    button.primary, button.secondary { border:1px solid transparent; border-radius:2px; padding:11px 15px; cursor:pointer; font-weight:800; transition:transform .15s ease, box-shadow .15s ease; }
+    button.primary { background:#263b51; color:#fff; box-shadow:2px 2px 0 #c49a4a; }
+    button.secondary { background:#e8dfcf; color:#263b51; border-color:#c9bda7; }
+    button.primary:hover, button.secondary:hover { transform:translate(-1px,-1px); box-shadow:3px 3px 0 #c49a4a; }
     button:disabled { opacity:.55; cursor:not-allowed; }
     .actions { display:flex; gap:9px; flex-wrap:wrap; margin-top:14px; }
-    .keybox { background:#fbf8f6; border:1px dashed #cdb8aa; border-radius:12px; padding:14px; word-break:break-word; }
-    .keybox strong { color:#5e4538; }
-    .status { margin-top:12px; padding:10px 12px; border-radius:9px; background:#f3eee9; }
+    .keybox { background:#f8f3e8; border:1px dashed #bcae94; border-radius:2px; padding:14px; word-break:break-word; }
+    .keybox strong { color:#263b51; }
+    .status { margin-top:12px; padding:10px 12px; border-left:4px solid #c49a4a; background:#f1eadc; }
     .status.ok { background:#e8f5ea; color:#215b2c; }
     .status.err { background:#fdeaea; color:#8b2525; }
     .table-wrap { overflow:auto; }
     table { width:100%; border-collapse:collapse; }
     th,td { padding:10px; border-bottom:1px solid #eaded6; text-align:left; vertical-align:top; }
-    th { color:#5e4538; background:#faf6f3; }
-    .quiz-q { margin:18px 0; padding:16px; background:#faf7f4; border-radius:12px; }
+    th { color:#263b51; background:#eee5d5; }
+    .quiz-q { margin:18px 0; padding:16px; background:#f8f3e8; border:1px solid #d7c9ae; border-radius:2px; }
     .option { display:flex; gap:9px; align-items:flex-start; margin:8px 0; font-weight:400; color:#333; }
     .option input { width:auto; margin-top:4px; }
     .score { font-size:1.1rem; font-weight:800; margin-top:15px; }
     .footer-note { text-align:center; color:#76675e; margin-top:28px; font-size:.9rem; }
-    code { background:#f1ebe7; padding:2px 5px; border-radius:4px; }
+    code { background:#eee5d5; padding:2px 5px; border-radius:2px; color:#263b51; }
+
+    /* =========================
+       RSA SIMULATION
+       ========================= */
+    .rsa-animation {
+      margin-top: 24px;
+      padding: 24px;
+      background: #f8f3e8;
+      border: 1px solid #c9bda7;
+      border-radius: 3px;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .sim-message,
+    .sim-stage {
+      flex: 1 1 155px;
+      min-width: 145px;
+      min-height: 145px;
+      padding: 16px;
+      background: #fffdf8;
+      border: 2px solid #c9bda7;
+      border-radius: 3px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
+    }
+
+    .sim-label {
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #8f6b2e;
+      margin-bottom: 8px;
+    }
+
+    .sim-value {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #263b51;
+      word-break: break-word;
+      max-width: 100%;
+    }
+
+    .sim-arrow {
+      align-self: center;
+      font-size: 2rem;
+      font-weight: 900;
+      color: #8f6b2e;
+      min-width: 28px;
+      text-align: center;
+    }
+
+    .key-display {
+      font-size: .78rem;
+      color: #76675e;
+      line-height: 1.45;
+      margin-bottom: 8px;
+    }
+
+    .key-display strong {
+      display: block;
+      color: #263b51;
+      margin-top: 3px;
+      word-break: break-word;
+    }
+
+    .rsa-animation .formula {
+      width: 100%;
+      margin: 7px 0 0;
+      font-size: .76rem;
+      padding: 8px;
+    }
+
+    .particle {
+      margin-top: 8px;
+      color: #c49a4a;
+      opacity: 0;
+      font-size: 1.3rem;
+    }
+
+    .simulation-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .rsa-animation.running .particle {
+      animation: rsaPulse .8s infinite;
+    }
+
+    .rsa-animation .sim-stage.active {
+      border-color: #c49a4a;
+      box-shadow: 0 0 0 3px rgba(196,154,74,.18);
+      transform: translateY(-3px);
+    }
+
+    .rsa-animation .sim-message.active {
+      border-color: #263b51;
+      box-shadow: 0 0 0 3px rgba(38,59,81,.12);
+      transform: translateY(-3px);
+    }
+
+    .sim-arrow.active {
+      color: #c49a4a;
+      transform: scale(1.15);
+    }
+
+    @keyframes rsaPulse {
+      0%   { opacity: 0; transform: scale(.5); }
+      50%  { opacity: 1; transform: scale(1.25); }
+      100% { opacity: 0; transform: scale(.5); }
+    }
+
+    @media (max-width: 900px) {
+      .rsa-animation {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .sim-arrow {
+        transform: rotate(90deg);
+        justify-self: center;
+      }
+
+      .sim-arrow.active {
+        transform: rotate(90deg) scale(1.15);
+      }
+    }
+
     @media(max-width:760px) { .grid,.row,.row3 { grid-template-columns:1fr; } .hero { padding:22px; } }
   </style>
 </head>
@@ -59,6 +200,7 @@
       <button class="tab-btn active" data-tab="aim">Aim & Theory</button>
       <button class="tab-btn" data-tab="procedure">Procedure</button>
       <button class="tab-btn" data-tab="lab">Interactive Lab</button>
+      <button class="tab-btn" data-tab="simulation">Simulation</button>
       <button class="tab-btn" data-tab="assessment">Assessment</button>
       <button class="tab-btn" data-tab="quiz">Quiz</button>
       <button class="tab-btn" data-tab="references">References</button>
@@ -194,6 +336,91 @@
       </article>
     </section>
 
+    <section id="simulation" class="panel">
+      <article class="card">
+        <h2>RSA Encryption & Decryption Simulation</h2>
+        <p>
+          Watch the plaintext move through RSA encryption using the public key,
+          become ciphertext, and then return to the original message through
+          RSA decryption using the private key.
+        </p>
+
+        <div id="rsaAnimation" class="rsa-animation">
+
+          <div class="sim-message" id="plainBox">
+            <span class="sim-label">PLAINTEXT</span>
+            <div id="simPlaintext" class="sim-value">HELLO RSA</div>
+          </div>
+
+          <div class="sim-arrow" id="arrow1">→</div>
+
+          <div class="sim-stage" id="encryptBox">
+            <span class="sim-label">RSA ENCRYPTION</span>
+            <div class="key-display">
+              Public Key
+              <strong id="simPublicKey">(17, 3233)</strong>
+            </div>
+            <div class="formula">c = m<sup>e</sup> mod n</div>
+            <div id="encryptionParticle" class="particle">●</div>
+          </div>
+
+          <div class="sim-arrow" id="arrow2">→</div>
+
+          <div class="sim-message" id="cipherBox">
+            <span class="sim-label">CIPHERTEXT</span>
+            <div id="simCiphertext" class="sim-value">—</div>
+          </div>
+
+          <div class="sim-arrow" id="arrow3">→</div>
+
+          <div class="sim-stage" id="decryptBox">
+            <span class="sim-label">RSA DECRYPTION</span>
+            <div class="key-display">
+              Private Key
+              <strong id="simPrivateKey">(2753, 3233)</strong>
+            </div>
+            <div class="formula">m = c<sup>d</sup> mod n</div>
+            <div id="decryptionParticle" class="particle">●</div>
+          </div>
+
+          <div class="sim-arrow" id="arrow4">→</div>
+
+          <div class="sim-message" id="recoveredBox">
+            <span class="sim-label">RECOVERED MESSAGE</span>
+            <div id="simRecovered" class="sim-value">—</div>
+          </div>
+        </div>
+
+        <div class="simulation-controls">
+          <button type="button" class="primary" id="startSimulation">
+            ▶ Start Simulation
+          </button>
+          <button type="button" class="secondary" id="resetSimulation">
+            ↻ Reset
+          </button>
+        </div>
+
+        <div id="simulationStep" class="status" aria-live="polite">
+          Generate keys in the Interactive Lab, then start the simulation.
+        </div>
+      </article>
+
+      <article class="card" style="margin-top:18px">
+        <h3>What the animation represents</h3>
+        <div class="formula">
+          Plaintext → Public-key encryption → Ciphertext
+          → Private-key decryption → Original message
+        </div>
+        <ol class="steps">
+          <li>The simulation reads the current message and RSA keys from the Interactive Lab.</li>
+          <li>Each UTF-8 byte is represented by an integer <code>m</code>.</li>
+          <li>RSA encryption calculates <code>c = m<sup>e</sup> mod n</code>.</li>
+          <li>The ciphertext values are then decrypted using <code>m = c<sup>d</sup> mod n</code>.</li>
+          <li>The recovered bytes are converted back into the original plaintext.</li>
+        </ol>
+      </article>
+    </section>
+
     <section id="assessment" class="panel">
       <div class="grid">
         <article class="card">
@@ -274,5 +501,6 @@
   </main>
   <script src="../../js/common.js"></script>
   <script src="script.js"></script>
+  <script src="animation.js"></script>
 </body>
 </html>
