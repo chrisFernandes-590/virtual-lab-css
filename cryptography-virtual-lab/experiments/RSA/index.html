@@ -3,504 +3,841 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RSA Encryption and Decryption | Virtual Cryptography Lab</title>
+  <title>RSA Encryption & Decryption | Virtual Cryptography Laboratory</title>
+  
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Lab Styles -->
   <link rel="stylesheet" href="../../css/style.css">
-  <style>
-    .rsa-shell { max-width: 1180px; margin: 0 auto; padding: 34px 20px 64px; }
-    .hero { background:#172b42; color:#fff; border:1px solid #0c1a2a; border-top:6px solid #c49a4a; border-radius:3px; padding:30px 32px; box-shadow:0 8px 0 rgba(23,43,66,.12); }
-    .hero h1 { margin:0 0 8px; font-family:Georgia,serif; font-size:clamp(1.8rem,4vw,2.8rem); letter-spacing:.02em; }
-    .hero p { margin:0; color:#dce4eb; line-height:1.65; }
-    .tabs { display:flex; gap:0; flex-wrap:wrap; margin:24px 0; border-bottom:2px solid #c49a4a; }
-    .tab-btn { border:1px solid #c9bda7; border-bottom:0; background:#e8dfcf; color:#263b51; padding:11px 16px; border-radius:3px 3px 0 0; cursor:pointer; font-weight:700; }
-    .tab-btn + .tab-btn { border-left:0; }
-    .tab-btn.active { background:#263b51; color:#fff; border-color:#263b51; }
-    .panel { display:none; }
-    .panel.active { display:block; }
-    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
-    .card { background:#fffdf8; border:1px solid #c9bda7; border-radius:3px; padding:22px; box-shadow:4px 4px 0 rgba(38,59,81,.08); }
-    .card h2,.card h3 { color:#263b51; margin-top:0; font-family:Georgia,serif; }
-    .formula { background:#f1eadc; border:1px solid #d7c9ae; border-left:5px solid #c49a4a; padding:14px 16px; border-radius:2px; margin:12px 0; font-family:ui-monospace,monospace; overflow:auto; }
-    .steps li { margin:9px 0; line-height:1.5; }
-    label { display:block; font-weight:700; margin:12px 0 6px; color:#263b51; }
-    input, textarea, select { width:100%; box-sizing:border-box; border:1px solid #bcae94; border-radius:2px; padding:11px 12px; font:inherit; background:#fff; color:#26312f; }
-    input:focus, textarea:focus, select:focus { outline:3px solid rgba(196,154,74,.3); border-color:#a47729; }
-    textarea { min-height:100px; resize:vertical; }
-    .row { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
-    .row3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
-    button.primary, button.secondary { border:1px solid transparent; border-radius:2px; padding:11px 15px; cursor:pointer; font-weight:800; transition:transform .15s ease, box-shadow .15s ease; }
-    button.primary { background:#263b51; color:#fff; box-shadow:2px 2px 0 #c49a4a; }
-    button.secondary { background:#e8dfcf; color:#263b51; border-color:#c9bda7; }
-    button.primary:hover, button.secondary:hover { transform:translate(-1px,-1px); box-shadow:3px 3px 0 #c49a4a; }
-    button:disabled { opacity:.55; cursor:not-allowed; }
-    .actions { display:flex; gap:9px; flex-wrap:wrap; margin-top:14px; }
-    .keybox { background:#f8f3e8; border:1px dashed #bcae94; border-radius:2px; padding:14px; word-break:break-word; }
-    .keybox strong { color:#263b51; }
-    .status { margin-top:12px; padding:10px 12px; border-left:4px solid #c49a4a; background:#f1eadc; }
-    .status.ok { background:#e8f5ea; color:#215b2c; }
-    .status.err { background:#fdeaea; color:#8b2525; }
-    .table-wrap { overflow:auto; }
-    table { width:100%; border-collapse:collapse; }
-    th,td { padding:10px; border-bottom:1px solid #eaded6; text-align:left; vertical-align:top; }
-    th { color:#263b51; background:#eee5d5; }
-    .quiz-q { margin:18px 0; padding:16px; background:#f8f3e8; border:1px solid #d7c9ae; border-radius:2px; }
-    .option { display:flex; gap:9px; align-items:flex-start; margin:8px 0; font-weight:400; color:#333; }
-    .option input { width:auto; margin-top:4px; }
-    .score { font-size:1.1rem; font-weight:800; margin-top:15px; }
-    .footer-note { text-align:center; color:#76675e; margin-top:28px; font-size:.9rem; }
-    code { background:#eee5d5; padding:2px 5px; border-radius:2px; color:#263b51; }
-
-    /* =========================
-       RSA SIMULATION
-       ========================= */
-    .rsa-animation {
-      margin-top: 24px;
-      padding: 24px;
-      background: #f8f3e8;
-      border: 1px solid #c9bda7;
-      border-radius: 3px;
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .sim-message,
-    .sim-stage {
-      flex: 1 1 155px;
-      min-width: 145px;
-      min-height: 145px;
-      padding: 16px;
-      background: #fffdf8;
-      border: 2px solid #c9bda7;
-      border-radius: 3px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
-    }
-
-    .sim-label {
-      font-size: .72rem;
-      font-weight: 800;
-      letter-spacing: 1px;
-      color: #8f6b2e;
-      margin-bottom: 8px;
-    }
-
-    .sim-value {
-      font-size: 1rem;
-      font-weight: 800;
-      color: #263b51;
-      word-break: break-word;
-      max-width: 100%;
-    }
-
-    .sim-arrow {
-      align-self: center;
-      font-size: 2rem;
-      font-weight: 900;
-      color: #8f6b2e;
-      min-width: 28px;
-      text-align: center;
-    }
-
-    .key-display {
-      font-size: .78rem;
-      color: #76675e;
-      line-height: 1.45;
-      margin-bottom: 8px;
-    }
-
-    .key-display strong {
-      display: block;
-      color: #263b51;
-      margin-top: 3px;
-      word-break: break-word;
-    }
-
-    .rsa-animation .formula {
-      width: 100%;
-      margin: 7px 0 0;
-      font-size: .76rem;
-      padding: 8px;
-    }
-
-    .particle {
-      margin-top: 8px;
-      color: #c49a4a;
-      opacity: 0;
-      font-size: 1.3rem;
-    }
-
-    .simulation-controls {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 18px;
-      flex-wrap: wrap;
-    }
-
-    .rsa-animation.running .particle {
-      animation: rsaPulse .8s infinite;
-    }
-
-    .rsa-animation .sim-stage.active {
-      border-color: #c49a4a;
-      box-shadow: 0 0 0 3px rgba(196,154,74,.18);
-      transform: translateY(-3px);
-    }
-
-    .rsa-animation .sim-message.active {
-      border-color: #263b51;
-      box-shadow: 0 0 0 3px rgba(38,59,81,.12);
-      transform: translateY(-3px);
-    }
-
-    .sim-arrow.active {
-      color: #c49a4a;
-      transform: scale(1.15);
-    }
-
-    @keyframes rsaPulse {
-      0%   { opacity: 0; transform: scale(.5); }
-      50%  { opacity: 1; transform: scale(1.25); }
-      100% { opacity: 0; transform: scale(.5); }
-    }
-
-    @media (max-width: 900px) {
-      .rsa-animation {
-        display: grid;
-        grid-template-columns: 1fr;
-      }
-
-      .sim-arrow {
-        transform: rotate(90deg);
-        justify-self: center;
-      }
-
-      .sim-arrow.active {
-        transform: rotate(90deg) scale(1.15);
-      }
-    }
-
-    @media(max-width:760px) { .grid,.row,.row3 { grid-template-columns:1fr; } .hero { padding:22px; } }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="rsa-shell">
-    <section class="hero">
-      <h1>RSA Encryption and Decryption</h1>
-      <p>Virtual Cryptography Laboratory · Generate a key pair, encrypt a message, decrypt it, and inspect the mathematics behind each step.</p>
-    </section>
 
-    <nav class="tabs" aria-label="Experiment sections">
-      <button class="tab-btn active" data-tab="aim">Aim & Theory</button>
-      <button class="tab-btn" data-tab="procedure">Procedure</button>
-      <button class="tab-btn" data-tab="lab">Interactive Lab</button>
-      <button class="tab-btn" data-tab="simulation">Simulation</button>
-      <button class="tab-btn" data-tab="assessment">Assessment</button>
-      <button class="tab-btn" data-tab="quiz">Quiz</button>
-      <button class="tab-btn" data-tab="references">References</button>
-    </nav>
-
-    <section id="aim" class="panel active">
-      <div class="grid">
-        <article class="card">
-          <h2>Aim</h2>
-          <p>To understand and simulate RSA public-key cryptography by generating an RSA key pair and using it to encrypt and decrypt messages.</p>
-        </article>
-        <article class="card">
-          <h2>Objectives</h2>
-          <ul class="steps">
-            <li>Generate RSA public and private keys.</li>
-            <li>Understand the roles of <code>p</code>, <code>q</code>, <code>n</code>, <code>φ(n)</code>, <code>e</code>, and <code>d</code>.</li>
-            <li>Encrypt a message using the public key.</li>
-            <li>Decrypt the ciphertext using the private key.</li>
-            <li>Observe how changing the key parameters changes the ciphertext.</li>
-          </ul>
-        </article>
-      </div>
-      <article class="card" style="margin-top:18px">
-        <h2>RSA Theory</h2>
-        <p>RSA is a public-key cryptosystem. Two related keys are used: a public key for encryption and a private key for decryption.</p>
-        <div class="formula">
-          Choose primes p and q<br>
-          n = p × q<br>
-          φ(n) = (p − 1)(q − 1)<br>
-          Choose e such that 1 &lt; e &lt; φ(n) and gcd(e, φ(n)) = 1<br>
-          Find d such that e × d ≡ 1 (mod φ(n))<br>
-          Public key = (e, n)<br>
-          Private key = (d, n)
+  <div class="app-container">
+    
+    <!-- Left Navigation Rail (Semi-Hidden / Collapsible) -->
+    <aside class="sidebar-rail" id="sidebarRail" aria-label="Virtual Lab Navigation">
+      
+      <div class="rail-header">
+        <div class="rail-brand-group">
+          <div class="lab-tag">
+            <span>⚡</span>
+            <span>EXP-RSA · SEM V</span>
+          </div>
+          <h2 class="lab-title">RSA Cryptosystem</h2>
+          <p class="lab-subtitle">Asymmetric Key Cryptography</p>
         </div>
-        <p>For a message represented by an integer <code>m</code> with <code>0 ≤ m &lt; n</code>:</p>
-        <div class="formula">Encryption: c = m<sup>e</sup> mod n<br>Decryption: m = c<sup>d</sup> mod n</div>
-        <p><strong>Educational note:</strong> this browser simulation intentionally uses small/toy RSA parameters so the arithmetic can be visualized. It is not suitable for protecting real data.</p>
-      </article>
-    </section>
-
-    <section id="procedure" class="panel">
-      <article class="card">
-        <h2>Step-by-step Procedure</h2>
-        <ol class="steps">
-          <li>Enter two distinct prime numbers <code>p</code> and <code>q</code>, or click <strong>Generate Example Keys</strong>.</li>
-          <li>Compute <code>n = p × q</code>.</li>
-          <li>Compute Euler's totient <code>φ(n) = (p−1)(q−1)</code>.</li>
-          <li>Choose a valid public exponent <code>e</code> coprime to <code>φ(n)</code>.</li>
-          <li>Compute the private exponent <code>d</code>, the modular inverse of <code>e</code> modulo <code>φ(n)</code>.</li>
-          <li>The public key is <code>(e,n)</code>; the private key is <code>(d,n)</code>.</li>
-          <li>Enter a short message and click <strong>Encrypt</strong>. Each UTF-8 byte is converted to an integer and encrypted.</li>
-          <li>Click <strong>Decrypt</strong> to recover the original bytes and message.</li>
-          <li>Use <strong>Reset</strong> to repeat the experiment with different values.</li>
-        </ol>
-      </article>
-      <article class="card" style="margin-top:18px">
-        <h2>Expected Observation</h2>
-        <p>The public key can be used to transform the message into ciphertext. The corresponding private key reverses that transformation, returning the original message.</p>
-        <div class="formula">Original message → UTF-8 bytes → RSA encryption → Ciphertext → RSA decryption → Original bytes → Original message</div>
-      </article>
-    </section>
-
-    <section id="lab" class="panel">
-      <div class="grid">
-        <article class="card">
-          <h2>1. Key Generation</h2>
-          <div class="row">
-            <div>
-              <label for="p">Prime p</label>
-              <input id="p" type="number" min="2" step="1" value="61">
-            </div>
-            <div>
-              <label for="q">Prime q</label>
-              <input id="q" type="number" min="2" step="1" value="53">
-            </div>
-          </div>
-          <label for="e">Public exponent e (optional)</label>
-          <input id="e" type="number" min="2" step="1" placeholder="Auto-select if blank">
-          <div class="actions">
-            <button class="primary" id="generateBtn">Generate Keys</button>
-            <button class="secondary" id="exampleBtn">Generate Example Keys</button>
-          </div>
-          <div id="keyStatus" class="status">Generate keys to begin.</div>
-        </article>
-
-        <article class="card">
-          <h2>2. Generated Values</h2>
-          <div class="row">
-            <div class="keybox"><strong>n</strong><div id="nOut">—</div></div>
-            <div class="keybox"><strong>φ(n)</strong><div id="phiOut">—</div></div>
-          </div>
-          <div class="row" style="margin-top:12px">
-            <div class="keybox"><strong>Public Key (e, n)</strong><div id="pubOut">—</div></div>
-            <div class="keybox"><strong>Private Key (d, n)</strong><div id="privOut">—</div></div>
-          </div>
-          <div class="keybox" style="margin-top:12px"><strong>Key-generation explanation</strong><div id="keySteps">—</div></div>
-        </article>
+        <button type="button" class="rail-toggle-btn" id="railToggleBtn" title="Collapse / Expand Sidebar" aria-label="Toggle Sidebar">
+          <span id="railToggleIcon">⮜</span>
+        </button>
       </div>
 
-      <div class="grid" style="margin-top:18px">
-        <article class="card">
-          <h2>3. Encrypt</h2>
-          <label for="message">Plaintext message</label>
-          <textarea id="message" placeholder="Enter a short message, e.g. HELLO RSA">HELLO RSA</textarea>
-          <div class="actions">
-            <button class="primary" id="encryptBtn">Encrypt</button>
-            <button class="secondary" id="clearCipherBtn">Clear Ciphertext</button>
-          </div>
-          <label for="ciphertext">Ciphertext</label>
-          <textarea id="ciphertext" readonly placeholder="Encrypted byte values will appear here"></textarea>
-        </article>
+      <nav class="nav-menu" role="tablist">
+        <div class="nav-label">Navigation Menu</div>
+        
+        <button type="button" class="nav-item active" data-tab="aim" role="tab" aria-selected="true" aria-controls="aim" title="Aim & Objectives">
+          <span class="nav-icon">🎯</span>
+          <span class="nav-text">Aim</span>
+        </button>
 
-        <article class="card">
-          <h2>4. Decrypt</h2>
-          <p>Decrypt the ciphertext produced above using the generated private key.</p>
-          <div class="actions">
-            <button class="primary" id="decryptBtn">Decrypt</button>
-          </div>
-          <label for="decrypted">Recovered plaintext</label>
-          <textarea id="decrypted" readonly placeholder="Decrypted message will appear here"></textarea>
-          <div id="decryptStatus" class="status">Waiting for ciphertext.</div>
-        </article>
-      </div>
+        <button type="button" class="nav-item" data-tab="theory" role="tab" aria-selected="false" aria-controls="theory" title="RSA Theory">
+          <span class="nav-icon">📖</span>
+          <span class="nav-text">Theory</span>
+        </button>
 
-      <article class="card" style="margin-top:18px">
-        <h2>5. Byte-level Visualization</h2>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Index</th><th>Byte / character</th><th>m</th><th>c = m<sup>e</sup> mod n</th><th>Recovered m</th><th>Recovered character</th></tr></thead>
-            <tbody id="traceBody"><tr><td colspan="6">Encrypt a message to view the calculation trace.</td></tr></tbody>
-          </table>
+        <button type="button" class="nav-item" data-tab="procedure" role="tab" aria-selected="false" aria-controls="procedure" title="Step-by-Step Procedure">
+          <span class="nav-icon">📋</span>
+          <span class="nav-text">Procedure</span>
+        </button>
+
+        <button type="button" class="nav-item" data-tab="lab" role="tab" aria-selected="false" aria-controls="lab" title="Interactive Lab">
+          <span class="nav-icon">🔬</span>
+          <span class="nav-text">Interactive Lab</span>
+        </button>
+
+        <button type="button" class="nav-item" data-tab="simulation" role="tab" aria-selected="false" aria-controls="simulation" title="Interactive Simulation">
+          <span class="nav-icon">⚡</span>
+          <span class="nav-text">Simulation</span>
+          <span class="nav-badge">Interactive</span>
+        </button>
+
+        <button type="button" class="nav-item" data-tab="assessment" role="tab" aria-selected="false" aria-controls="assessment" title="Assessment & Viva">
+          <span class="nav-icon">📝</span>
+          <span class="nav-text">Assessment</span>
+        </button>
+
+        <button type="button" class="nav-item" data-tab="quiz" role="tab" aria-selected="false" aria-controls="quiz" title="20-Question Quiz">
+          <span class="nav-icon">❓</span>
+          <span class="nav-text">Quiz</span>
+          <span class="nav-badge">20 Qs</span>
+        </button>
+
+        <button type="button" class="nav-item" data-tab="references" role="tab" aria-selected="false" aria-controls="references" title="References">
+          <span class="nav-icon">📚</span>
+          <span class="nav-text">References</span>
+        </button>
+      </nav>
+
+      <div class="rail-footer">
+        <div class="rail-footer-content">
+          <div style="font-weight: 600; color: #cbd5e1; margin-bottom: 2px;">Virtual Cryptography Lab</div>
+          <div class="status-indicator">
+            <span class="status-dot"></span>
+            <span>Engine: Ready (JS BigInt)</span>
+          </div>
         </div>
-      </article>
-    </section>
+      </div>
+    </aside>
 
-    <section id="simulation" class="panel">
-      <article class="card">
-        <h2>RSA Encryption & Decryption Simulation</h2>
-        <p>
-          Watch the plaintext move through RSA encryption using the public key,
-          become ciphertext, and then return to the original message through
-          RSA decryption using the private key.
+    <!-- Main Workspace -->
+    <main class="main-wrapper">
+      
+      <!-- Top Section Header -->
+      <header class="top-hero">
+        <h1 id="mainHeroTitle">Aim & Objectives</h1>
+        <p id="mainHeroDesc">Understand the foundational principles, mathematical background, and practical implementation of the RSA public-key algorithm.</p>
+      </header>
+
+      <div class="content-body">
+
+        <!-- ==========================================
+             1. AIM SECTION
+             ========================================== -->
+        <section id="aim" class="panel active" role="tabpanel">
+          <div class="grid">
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <span class="card-icon">🎯</span>
+                  <h2>Experiment Aim</h2>
+                </div>
+              </div>
+              <p>
+                To implement and analyze the <strong>Rivest–Shamir–Adleman (RSA)</strong> public-key cryptosystem. 
+                Students will generate asymmetric key pairs, perform modular exponential encryption of plaintext messages, 
+                and execute modular inverse decryption to recover the original communication.
+              </p>
+              <div class="formula-box formula-highlight">
+                <strong>Core Premise:</strong> Security relies on the asymmetric computational hardness of factoring the product of two large prime numbers <var>n</var> = <var>p</var> &times; <var>q</var>.
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <span class="card-icon">🎯</span>
+                  <h2>Learning Objectives</h2>
+                </div>
+              </div>
+              <ul class="step-list">
+                <li>Understand the difference between symmetric and asymmetric (public-key) cryptosystems.</li>
+                <li>Derive the RSA modulus <var>n</var> and Euler's totient &phi;(<var>n</var>) = (<var>p</var> &minus; 1)(<var>q</var> &minus; 1) from prime factors <var>p</var> and <var>q</var>.</li>
+                <li>Apply the Extended Euclidean Algorithm to calculate the private decryption exponent <var>d</var> &equiv; <var>e</var><sup>&minus;1</sup> (mod &phi;(<var>n</var>)).</li>
+                <li>Perform byte-by-byte modular exponentiation for encryption (<var>c</var> &equiv; <var>m</var><sup><var>e</var></sup> mod <var>n</var>) and decryption (<var>m</var> &equiv; <var>c</var><sup><var>d</var></sup> mod <var>n</var>).</li>
+                <li>Analyze the vulnerabilities of textbook RSA (e.g. homomorphic malleability) versus padded RSA (OAEP).</li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="grid" style="margin-top: 22px;">
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <span class="card-icon">📚</span>
+                  <h2>Prerequisites</h2>
+                </div>
+              </div>
+              <ul class="bullet-list">
+                <li>Basic Number Theory: Primes, greatest common divisor (gcd), and Euclidean algorithm.</li>
+                <li>Modular Arithmetic: Congruence classes, modular inverses, and modular exponentiation.</li>
+                <li>Euler's Totient Theorem: <var>a</var><sup>&phi;(<var>n</var>)</sup> &equiv; 1 (mod <var>n</var>) for gcd(<var>a</var>, <var>n</var>) = 1.</li>
+                <li>Character Encoding: Mapping ASCII / UTF-8 characters to numerical byte representations.</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <span class="card-icon">✨</span>
+                  <h2>Expected Learning Outcomes</h2>
+                </div>
+              </div>
+              <ul class="bullet-list">
+                <li>Ability to independently execute RSA key generation for any pair of distinct primes.</li>
+                <li>Proficiency in tracing the intermediate numerical ciphertext states during transmission.</li>
+                <li>Comprehension of modern attack vectors including Wiener's small private exponent attack and Common Modulus scenarios.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <!-- ==========================================
+             2. THEORY SECTION
+             ========================================== -->
+        <section id="theory" class="panel" role="tabpanel">
+          <article class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <span class="card-icon">📖</span>
+                <h2>1. Introduction to Public-Key Cryptography</h2>
+              </div>
+            </div>
+            <p>
+              Introduced by <strong>Ron Rivest, Adi Shamir, and Leonard Adleman in 1977</strong>, RSA is an <em>asymmetric</em> cryptosystem. Unlike symmetric ciphers (like AES or DES) where sender and receiver must share a confidential key over a secure channel, RSA operates using a mathematically linked <strong>key pair</strong>:
+            </p>
+            <div class="grid">
+              <div class="key-badge-card">
+                <div class="key-badge-title">Public Key (<var>e</var>, <var>n</var>)</div>
+                <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">
+                  Published openly to the world. Anyone can use (<var>e</var>, <var>n</var>) to encrypt a confidential message or verify a digital signature.
+                </p>
+              </div>
+              <div class="key-badge-card">
+                <div class="key-badge-title">Private Key (<var>d</var>, <var>n</var>)</div>
+                <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">
+                  Kept strictly secret by the receiver. Only the holder of <var>d</var> can decrypt ciphertexts or generate valid digital signatures.
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <span class="card-icon">📐</span>
+                <h2>2. Mathematical Foundations & Key Generation</h2>
+              </div>
+            </div>
+            <p>The mathematical security of RSA relies on the <strong>trapdoor one-way permutation</strong> concept:</p>
+            
+            <div class="formula-box">
+              <strong>Step 1: Select Primes</strong><br>
+              Choose two distinct large prime numbers <var>p</var> and <var>q</var>.<br><br>
+              
+              <strong>Step 2: Compute Modulus <var>n</var></strong><br>
+              <var>n</var> = <var>p</var> &times; <var>q</var><br>
+              <span class="formula-sub">The length of <var>n</var> in bits represents the key size (e.g., 2048 or 3072 bits).</span><br><br>
+
+              <strong>Step 3: Compute Euler's Totient &phi;(<var>n</var>)</strong><br>
+              &phi;(<var>n</var>) = &phi;(<var>p</var>) &times; &phi;(<var>q</var>) = (<var>p</var> &minus; 1)(<var>q</var> &minus; 1)<br>
+              <span class="formula-sub">&phi;(<var>n</var>) counts the number of positive integers up to <var>n</var> that are coprime to <var>n</var>.</span><br><br>
+
+              <strong>Step 4: Choose Public Exponent <var>e</var></strong><br>
+              Select an integer <var>e</var> such that 1 &lt; <var>e</var> &lt; &phi;(<var>n</var>) and gcd(<var>e</var>, &phi;(<var>n</var>)) = 1.<br>
+              <span class="formula-sub">Standard industry values include <var>e</var> = 65537 (2<sup>16</sup> + 1, Fermat prime F<sub>4</sub>) for fast exponentiation.</span><br><br>
+
+              <strong>Step 5: Compute Private Exponent <var>d</var></strong><br>
+              Calculate <var>d</var> as the modular multiplicative inverse of <var>e</var> modulo &phi;(<var>n</var>) using the <em>Extended Euclidean Algorithm</em>:<br>
+              <var>e</var> &times; <var>d</var> &equiv; 1 (mod &phi;(<var>n</var>)) &iff; <var>d</var> &equiv; <var>e</var><sup>&minus;1</sup> (mod &phi;(<var>n</var>))
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <span class="card-icon">⚡</span>
+                <h2>3. Encryption, Decryption & Proof of Correctness</h2>
+              </div>
+            </div>
+            <div class="grid">
+              <div>
+                <h3>Encryption Process</h3>
+                <p>Convert plaintext into integer <var>m</var> where 0 &le; <var>m</var> &lt; <var>n</var>. Compute ciphertext <var>c</var>:</p>
+                <div class="formula-box">
+                  <var>c</var> = <var>m</var><sup><var>e</var></sup> mod <var>n</var>
+                </div>
+              </div>
+              <div>
+                <h3>Decryption Process</h3>
+                <p>Using the secret exponent <var>d</var>, recover message integer <var>m</var>:</p>
+                <div class="formula-box">
+                  <var>m</var> = <var>c</var><sup><var>d</var></sup> mod <var>n</var>
+                </div>
+              </div>
+            </div>
+
+            <h3 style="margin-top: 20px;">Mathematical Proof of Decryption (<var>c</var><sup><var>d</var></sup> &equiv; <var>m</var> mod <var>n</var>)</h3>
+            <p>
+              Since <var>e</var> &middot; <var>d</var> &equiv; 1 (mod &phi;(<var>n</var>)), there exists an integer <var>k</var> such that <var>e</var> &middot; <var>d</var> = 1 + <var>k</var>&phi;(<var>n</var>) = 1 + <var>k</var>(<var>p</var> &minus; 1)(<var>q</var> &minus; 1).
+            </p>
+            <div class="formula-box">
+              <var>c</var><sup><var>d</var></sup> &equiv; (<var>m</var><sup><var>e</var></sup>)<sup><var>d</var></sup> &equiv; <var>m</var><sup><var>ed</var></sup> &equiv; <var>m</var><sup>1 + <var>k</var>(<var>p</var>&minus;1)(<var>q</var>&minus;1)</sup> (mod <var>n</var>)<br><br>
+              <strong>Case 1 (gcd(<var>m</var>, <var>n</var>) = 1):</strong> By Euler's Totient Theorem, <var>m</var><sup>&phi;(<var>n</var>)</sup> &equiv; 1 (mod <var>n</var>).<br>
+              <var>m</var><sup><var>ed</var></sup> = <var>m</var> &middot; (<var>m</var><sup>&phi;(<var>n</var>)</sup>)<sup><var>k</var></sup> &equiv; <var>m</var> &middot; (1)<sup><var>k</var></sup> &equiv; <var>m</var> (mod <var>n</var>).<br><br>
+              <strong>Case 2 (gcd(<var>m</var>, <var>n</var>) &gt; 1):</strong> Using Fermat's Little Theorem and the Chinese Remainder Theorem (CRT), <var>m</var><sup><var>ed</var></sup> &equiv; <var>m</var> (mod <var>p</var>) and <var>m</var><sup><var>ed</var></sup> &equiv; <var>m</var> (mod <var>q</var>), guaranteeing <var>m</var><sup><var>ed</var></sup> &equiv; <var>m</var> (mod <var>pq</var>).
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <span class="card-icon">🛡️</span>
+                <h2>4. Textbook RSA vs Modern RSA with OAEP</h2>
+              </div>
+            </div>
+            <p>
+              This virtual lab demonstrates <strong>Textbook RSA</strong>, where byte values are directly exponentiated. In real-world security systems, unpadded textbook RSA is vulnerable:
+            </p>
+            <div class="grid">
+              <div class="formula-box" style="border-left-color: #ef4444;">
+                <strong>⚠️ Textbook RSA Weaknesses</strong>
+                <ul class="bullet-list" style="margin-top: 8px;">
+                  <li><strong>Deterministic:</strong> Identical plaintexts produce identical ciphertexts.</li>
+                  <li><strong>Multiplicative Homomorphism:</strong> (<var>m</var><sub>1</sub>)<sup><var>e</var></sup> &middot; (<var>m</var><sub>2</sub>)<sup><var>e</var></sup> &equiv; (<var>m</var><sub>1</sub><var>m</var><sub>2</sub>)<sup><var>e</var></sup> (mod <var>n</var>), enabling ciphertext tampering.</li>
+                  <li><strong>Chosen-Ciphertext Attack (CCA2):</strong> Attackers can query decryptions of <var>c</var> &middot; <var>r</var><sup><var>e</var></sup> mod <var>n</var>.</li>
+                </ul>
+              </div>
+
+              <div class="formula-box" style="border-left-color: #22c55e;">
+                <strong>✅ Modern RSA-OAEP (PKCS#1 v2.2)</strong>
+                <ul class="bullet-list" style="margin-top: 8px;">
+                  <li><strong>Probabilistic Padding:</strong> Optimal Asymmetric Encryption Padding injects cryptographic randomness and hash functions.</li>
+                  <li><strong>IND-CCA2 Secure:</strong> Prevents malleability and structural relation attacks.</li>
+                  <li><strong>Standard Key Size:</strong> Minimum 2048-bit or 3072-bit keys to defeat General Number Field Sieve (GNFS) factorization.</li>
+                </ul>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <!-- ==========================================
+             3. PROCEDURE SECTION
+             ========================================== -->
+        <section id="procedure" class="panel" role="tabpanel">
+          <article class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <span class="card-icon">📋</span>
+                <h2>Step-by-Step Laboratory Procedure</h2>
+              </div>
+            </div>
+            <ol class="step-list">
+              <li>
+                <strong>Input Prime Parameters:</strong> In the <em>Interactive Lab</em>, provide two distinct prime numbers <var>p</var> and <var>q</var> (or click "Example Keys" for classroom presets). Ensure <var>n</var> = <var>p</var> &times; <var>q</var> &gt; 255 so single-byte characters can be encrypted without modulus wrapping.
+              </li>
+              <li>
+                <strong>Public Exponent Selection:</strong> Specify an exponent <var>e</var> that is coprime to &phi;(<var>n</var>) = (<var>p</var>&minus;1)(<var>q</var>&minus;1), or leave blank for automatic coprime selection.
+              </li>
+              <li>
+                <strong>Compute Keys:</strong> Click <strong>Generate Keys</strong>. The system executes the Extended Euclidean Algorithm to calculate the modular inverse <var>d</var> &equiv; <var>e</var><sup>&minus;1</sup> (mod &phi;(<var>n</var>)).
+              </li>
+              <li>
+                <strong>Plaintext Input & Encryption:</strong> Enter a text string (e.g. <code>HELLO RSA</code>). Click <strong>Encrypt Message</strong> to observe UTF-8 byte conversion and subsequent modular exponentiation <var>c</var><sub>i</sub> = <var>m</var><sub>i</sub><sup><var>e</var></sup> mod <var>n</var>.
+              </li>
+              <li>
+                <strong>Decryption & Verification:</strong> Click <strong>Decrypt Ciphertext</strong>. The system calculates <var>m</var><sub>i</sub> = <var>c</var><sub>i</sub><sup><var>d</var></sup> mod <var>n</var> for each ciphertext block and decodes the byte array back to ASCII text.
+              </li>
+              <li>
+                <strong>Inspect Byte-Level Trace:</strong> Study the calculation table to observe how every individual character index is processed through modular powers.
+              </li>
+              <li>
+                <strong>Run the Animated Simulation:</strong> Navigate to the <em>Simulation</em> tab to watch the dynamic packet transmission through public and private cryptographic channels.
+              </li>
+            </ol>
+          </article>
+        </section>
+
+        <!-- ==========================================
+             4. INTERACTIVE LAB SECTION
+             ========================================== -->
+        <section id="lab" class="panel" role="tabpanel">
+          <div class="grid">
+            
+            <!-- Key Generation Form -->
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <span class="card-icon">🔑</span>
+                  <h2>1. RSA Key Configuration</h2>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="form-group">
+                  <label for="p">Prime <var>p</var> <span class="label-desc">(e.g., 61, 47, 89)</span></label>
+                  <input id="p" type="number" min="2" step="1" value="61">
+                </div>
+                <div class="form-group">
+                  <label for="q">Prime <var>q</var> <span class="label-desc">(e.g., 53, 71, 97)</span></label>
+                  <input id="q" type="number" min="2" step="1" value="53">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="e">Public Exponent <var>e</var> <span class="label-desc">(Coprime to &phi;(<var>n</var>), or leave blank)</span></label>
+                <input id="e" type="number" min="2" step="1" placeholder="Auto-select coprime (e.g., 17, 65537)">
+              </div>
+
+              <div class="btn-group">
+                <button type="button" class="btn-primary" id="generateBtn">
+                  <span>⚡</span> Generate Keys
+                </button>
+                <button type="button" class="btn-secondary" id="exampleBtn">
+                  <span>🎲</span> Example Keys
+                </button>
+              </div>
+
+              <div id="keyStatus" class="status-banner info">
+                Configure primes <var>p</var> and <var>q</var>, then click Generate Keys.
+              </div>
+            </article>
+
+            <!-- Computed Key Parameters -->
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <span class="card-icon">📊</span>
+                  <h2>2. Computed RSA Parameters</h2>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="key-badge-card">
+                  <div class="key-badge-title">Modulus <var>n</var> = <var>p</var> &times; <var>q</var></div>
+                  <div id="nOut" class="key-badge-value">—</div>
+                </div>
+                <div class="key-badge-card">
+                  <div class="key-badge-title">Euler's Totient &phi;(<var>n</var>)</div>
+                  <div id="phiOut" class="key-badge-value">—</div>
+                </div>
+              </div>
+
+              <div class="row" style="margin-top: 14px;">
+                <div class="key-badge-card">
+                  <div class="key-badge-title">Public Key (<var>e</var>, <var>n</var>)</div>
+                  <div id="pubOut" class="key-badge-value" style="color: #2563eb;">—</div>
+                </div>
+                <div class="key-badge-card">
+                  <div class="key-badge-title">Private Key (<var>d</var>, <var>n</var>)</div>
+                  <div id="privOut" class="key-badge-value" style="color: #b45309;">—</div>
+                </div>
+              </div>
+
+              <div id="keySteps" style="margin-top: 14px;">
+                <div class="formula-box">Mathematical derivation will appear here once keys are generated.</div>
+              </div>
+            </article>
+          </div>
+
+          <!-- Encryption & Decryption Workbenches -->
+          <div class="grid" style="margin-top: 22px;">
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <span class="card-icon">🔒</span>
+                  <h2>3. Message Encryption</h2>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="message">Plaintext Message</label>
+                <textarea id="message" placeholder="Enter plaintext message...">HELLO RSA</textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="button" class="btn-primary" id="encryptBtn">
+                  <span>🔒</span> Encrypt Message
+                </button>
+                <button type="button" class="btn-secondary" id="clearCipherBtn">
+                  <span>🧹</span> Clear
+                </button>
+              </div>
+
+              <div class="form-group" style="margin-top: 16px;">
+                <label for="ciphertext">Generated Ciphertext (<var>c</var> = <var>m</var><sup><var>e</var></sup> mod <var>n</var>)</label>
+                <textarea id="ciphertext" readonly placeholder="Encrypted integers will appear here..."></textarea>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <span class="card-icon">🔓</span>
+                  <h2>4. Message Decryption</h2>
+                </div>
+              </div>
+
+              <p style="font-size: 0.88rem; color: var(--text-muted);">
+                Decrypt the ciphertext integers using the computed private key exponent <var>d</var> and modulus <var>n</var>.
+              </p>
+
+              <div class="btn-group">
+                <button type="button" class="btn-primary" id="decryptBtn">
+                  <span>🔓</span> Decrypt Ciphertext
+                </button>
+              </div>
+
+              <div class="form-group" style="margin-top: 16px;">
+                <label for="decrypted">Recovered Plaintext (<var>m</var> = <var>c</var><sup><var>d</var></sup> mod <var>n</var>)</label>
+                <textarea id="decrypted" readonly placeholder="Decrypted plaintext will be restored here..."></textarea>
+              </div>
+
+              <div id="decryptStatus" class="status-banner">Waiting for ciphertext.</div>
+            </article>
+          </div>
+
+          <!-- Trace Table -->
+          <article class="card" style="margin-top: 22px;">
+            <div class="card-header">
+              <div class="card-title-group">
+                <span class="card-icon">🔍</span>
+                <h2>5. Byte-Level Mathematical Trace</h2>
+              </div>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">
+              Inspect the exact arithmetic operation performed on each UTF-8 byte of the message string:
+            </p>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Index</th>
+                    <th>Character</th>
+                    <th>Plain Byte (<var>m</var>)</th>
+                    <th>Encryption (<var>c</var> = <var>m</var><sup><var>e</var></sup> mod <var>n</var>)</th>
+                    <th>Decryption (<var>m</var> = <var>c</var><sup><var>d</var></sup> mod <var>n</var>)</th>
+                    <th>Recovered Char</th>
+                  </tr>
+                </thead>
+                <tbody id="traceBody">
+                  <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-light); padding: 24px;">
+                      Generate keys and encrypt a message to generate the byte trace.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- ==========================================
+             5. SIMULATION SECTION
+             ========================================== -->
+        <section id="simulation" class="panel" role="tabpanel">
+          <article class="sim-workbench">
+            <div class="sim-toolbar">
+              <div class="sim-input-row">
+                <label for="simCustomInput" style="margin: 0; font-size: 0.82rem; white-space: nowrap;">Input Message:</label>
+                <input type="text" id="simCustomInput" value="HELLO RSA" maxlength="24" style="max-width: 220px;">
+                <button type="button" class="btn-secondary" id="simApplyBtn" style="padding: 8px 12px; font-size: 0.8rem;">Apply</button>
+              </div>
+
+              <div class="sim-preset-chips">
+                <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-light);">Presets:</span>
+                <button type="button" class="chip-btn active" data-preset="HELLO RSA">HELLO RSA</button>
+                <button type="button" class="chip-btn" data-preset="CRYPTO 101">CRYPTO 101</button>
+                <button type="button" class="chip-btn" data-preset="ALICE & BOB">ALICE & BOB</button>
+                <button type="button" class="chip-btn" data-preset="KEY PAIR">KEY PAIR</button>
+              </div>
+            </div>
+
+            <!-- Character Stream Selector -->
+            <div class="token-stream-container">
+              <div class="token-stream-label">Message Stream (Click any character token to inspect):</div>
+              <div class="token-stream" id="tokenStreamBar">
+                <!-- Dynamically populated tokens -->
+              </div>
+            </div>
+
+            <!-- Visual Multi-Stage Pipeline Track -->
+            <div class="pipeline-track" id="simPipelineTrack">
+              
+              <!-- 1. Plaintext Token -->
+              <div class="stage-card" id="simStagePlain">
+                <div class="stage-tag">1. Plaintext</div>
+                <div class="stage-main-val" id="stagePlainVal">'H'</div>
+                <div class="stage-sub-math" id="stagePlainMath">ASCII: 72</div>
+              </div>
+
+              <div class="stage-arrow" id="arrowStage1">➔</div>
+
+              <!-- 2. Public Key Encryption -->
+              <div class="stage-card" id="simStageEncrypt">
+                <div class="stage-tag">2. Public Key Encryption</div>
+                <div class="stage-main-val" id="stageEncryptFormula" style="font-size: 0.95rem; color: #2563eb;">c = m<sup>e</sup> mod n</div>
+                <div class="stage-sub-math" id="stageEncryptKey">Key: e=17, n=3233</div>
+              </div>
+
+              <div class="stage-arrow" id="arrowStage2">➔</div>
+
+              <!-- 3. Ciphertext in Transit -->
+              <div class="stage-card" id="simStageCipher">
+                <div class="stage-tag">3. Ciphertext Channel</div>
+                <div class="stage-main-val" id="stageCipherVal" style="color: #b45309;">1916</div>
+                <div class="stage-sub-math" id="stageCipherMath">Public Transit Block</div>
+              </div>
+
+              <div class="stage-arrow" id="arrowStage3">➔</div>
+
+              <!-- 4. Private Key Decryption -->
+              <div class="stage-card" id="simStageDecrypt">
+                <div class="stage-tag">4. Private Key Decryption</div>
+                <div class="stage-main-val" id="stageDecryptFormula" style="font-size: 0.95rem; color: #7e22ce;">m = c<sup>d</sup> mod n</div>
+                <div class="stage-sub-math" id="stageDecryptKey">Key: d=2753, n=3233</div>
+              </div>
+
+              <div class="stage-arrow" id="arrowStage4">➔</div>
+
+              <!-- 5. Recovered Output -->
+              <div class="stage-card" id="simStageRecovered">
+                <div class="stage-tag">5. Recovered Message</div>
+                <div class="stage-main-val" id="stageRecoveredVal" style="color: #15803d;">'H'</div>
+                <div class="stage-sub-math" id="stageRecoveredMath">Verified Match ✓</div>
+              </div>
+
+            </div>
+
+            <!-- Multi-Phase Step Narrative & Explanations -->
+            <div class="sim-step-narrative" id="simStepNarrative">
+              <div class="narrative-header">
+                <div class="narrative-phase-badge" id="simPhaseBadge">
+                  <span>🔬</span> <span id="simPhaseText">Phase 1 of 5: Input Character Encoding</span>
+                </div>
+                <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-light);" id="simCharCounter">
+                  Character 1 of 9
+                </div>
+              </div>
+
+              <div class="narrative-grid">
+                <div class="narrative-col">
+                  <div class="narrative-col-title">Character & ASCII Value</div>
+                  <div class="narrative-col-body" id="narrativeColInput">Char: 'H' | m = 72</div>
+                </div>
+                <div class="narrative-col">
+                  <div class="narrative-col-title">Modular Encryption Formula</div>
+                  <div class="narrative-col-body" id="narrativeColEncrypt" style="color: #2563eb;">72<sup>17</sup> mod 3233 = 1916</div>
+                </div>
+                <div class="narrative-col">
+                  <div class="narrative-col-title">Modular Decryption Formula</div>
+                  <div class="narrative-col-body" id="narrativeColDecrypt" style="color: #7e22ce;">1916<sup>2753</sup> mod 3233 = 72 ('H')</div>
+                </div>
+              </div>
+
+              <div class="narrative-explanation" id="narrativeExplanationText">
+                Step-by-step educational breakdown will explain the active cryptographic transformation.
+              </div>
+            </div>
+
+            <!-- Simulation Playback & Speed Controls -->
+            <div class="sim-controls-bar">
+              <div class="playback-buttons">
+                <button type="button" class="btn-primary" id="simPlayBtn">
+                  <span id="simPlayIcon">▶</span> <span id="simPlayText">Auto-Play Walkthrough</span>
+                </button>
+                <button type="button" class="btn-secondary" id="simPrevPhaseBtn" title="Previous Step/Phase">
+                  ⏮ Prev Phase
+                </button>
+                <button type="button" class="btn-secondary" id="simNextPhaseBtn" title="Next Step/Phase">
+                  ⏭ Next Phase
+                </button>
+                <button type="button" class="btn-secondary" id="simNextCharBtn" title="Next Character">
+                  ⏩ Next Char
+                </button>
+                <button type="button" class="btn-secondary" id="simResetBtn">
+                  ↻ Reset
+                </button>
+              </div>
+
+              <div class="speed-control">
+                <span>Pace:</span>
+                <button type="button" class="chip-btn active" data-speed="3200">Slow (3.2s)</button>
+                <button type="button" class="chip-btn" data-speed="2000">Normal (2.0s)</button>
+                <button type="button" class="chip-btn" data-speed="1100">Fast (1.1s)</button>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <!-- ==========================================
+             6. ASSESSMENT SECTION
+             ========================================== -->
+        <section id="assessment" class="panel" role="tabpanel">
+          <div class="grid">
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <span class="card-icon">📝</span>
+                  <h2>Viva Voce & Analytical Questions</h2>
+                </div>
+              </div>
+              
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <span>1. Why must <var>p</var> and <var>q</var> be kept secret once keys are generated?</span>
+                  <span>▼</span>
+                </div>
+                <div class="accordion-body">
+                  If an attacker obtains <var>p</var> and <var>q</var>, they can immediately calculate &phi;(<var>n</var>) = (<var>p</var>&minus;1)(<var>q</var>&minus;1). Using the public exponent <var>e</var>, they can calculate the private key <var>d</var> &equiv; <var>e</var><sup>&minus;1</sup> (mod &phi;(<var>n</var>)) via the Extended Euclidean Algorithm, breaking the system completely.
+                </div>
+              </div>
+
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <span>2. Why is <var>e</var> = 65537 favored over small exponents like <var>e</var> = 3?</span>
+                  <span>▼</span>
+                </div>
+                <div class="accordion-body">
+                  65537 = 2<sup>16</sup> + 1 has a binary representation with only two 1s (<code>10000000000000001</code>), requiring only 17 modular multiplications. It is large enough to resist Håstad's broadcast attack and Coppersmith's short pad attack which compromise <var>e</var> = 3.
+                </div>
+              </div>
+
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <span>3. What is the difference between asymmetric and symmetric encryption?</span>
+                  <span>▼</span>
+                </div>
+                <div class="accordion-body">
+                  Symmetric encryption (e.g. AES) uses a single shared secret key for both encryption and decryption. Asymmetric encryption (e.g. RSA) uses a mathematically bound pair: a public key for encryption and a private key for decryption.
+                </div>
+              </div>
+
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <span>4. What happens if message integer <var>m</var> &ge; <var>n</var>?</span>
+                  <span>▼</span>
+                </div>
+                <div class="accordion-body">
+                  Modular reduction operates modulo <var>n</var>. If <var>m</var> &ge; <var>n</var>, <var>m</var> mod <var>n</var> produces an alias in &Zopf;<sub><var>n</var></sub>, causing irreversible information loss during decryption because multiple distinct messages map to the same ciphertext.
+                </div>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <span class="card-icon">🧪</span>
+                  <h2>Standard Test Cases</h2>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Test #</th>
+                      <th><var>p</var>, <var>q</var></th>
+                      <th><var>e</var></th>
+                      <th>Input</th>
+                      <th>Expected Result</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Case 1</strong></td>
+                      <td>61, 53</td>
+                      <td>17</td>
+                      <td><code>HELLO</code></td>
+                      <td>Decrypted output matches <code>HELLO</code> identically.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Case 2</strong></td>
+                      <td>61, 53</td>
+                      <td>Auto</td>
+                      <td><code>RSA2026</code></td>
+                      <td>Decrypted output matches <code>RSA2026</code>.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Case 3</strong></td>
+                      <td>47, 71</td>
+                      <td>79</td>
+                      <td><code>SECURITY</code></td>
+                      <td>Decrypted output matches <code>SECURITY</code>.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ==========================================
+             7. ADVANCED 20-QUESTION QUIZ SECTION
+             ========================================== -->
+        <section id="quiz" class="panel" role="tabpanel">
+          <div class="quiz-header-card">
+            <h2 style="font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: 6px;">RSA Comprehensive Assessment</h2>
+            <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5;">
+              Test your understanding of RSA number theory, key generation mathematics, security vulnerabilities, and implementation standards.
+            </p>
+            <div class="quiz-meta-row">
+              <div>Total Questions: <strong>20</strong></div>
+              <div>Difficulty: <strong>Advanced Academic</strong></div>
+              <div id="quizProgressText">Answered: <strong>0 / 20</strong></div>
+            </div>
+            <div class="quiz-progress-bar-wrap">
+              <div class="quiz-progress-bar" id="quizProgressBar"></div>
+            </div>
+          </div>
+
+          <form id="quizForm">
+            <div id="quizContainer">
+              <!-- 20 Questions rendered dynamically by script.js -->
+            </div>
+
+            <div class="btn-group" style="margin-top: 24px;">
+              <button type="button" class="btn-primary" id="submitQuizBtn" style="padding: 12px 28px; font-size: 0.95rem;">
+                <span>✓</span> Submit Quiz & View Detailed Analysis
+              </button>
+              <button type="button" class="btn-secondary" id="resetQuizBtn">
+                <span>↻</span> Reset Quiz
+              </button>
+            </div>
+
+            <div class="quiz-results-card" id="quizResultsCard">
+              <h3 style="font-family: var(--font-serif); font-size: 1.4rem; color: var(--text-heading); margin: 0;">Quiz Performance Summary</h3>
+              <div class="score-huge" id="quizScoreText">0 / 20</div>
+              <div class="score-badge" id="quizBadge">Analyzing...</div>
+              <p id="quizScoreMessage" style="color: var(--text-muted); max-width: 600px; margin: 0 auto 18px; font-size: 0.9rem;">
+                Review the detailed explanations below to reinforce key concepts.
+              </p>
+            </div>
+          </form>
+        </section>
+
+        <!-- ==========================================
+             8. REFERENCES SECTION
+             ========================================== -->
+        <section id="references" class="panel" role="tabpanel">
+          <article class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <span class="card-icon">📚</span>
+                <h2>Academic & Industry References</h2>
+              </div>
+            </div>
+            <ul class="step-list">
+              <li>
+                <strong>Rivest, R. L., Shamir, A., & Adleman, L. (1978).</strong> "A Method for Obtaining Digital Signatures and Public-Key Cryptosystems." <em>Communications of the ACM</em>, 21(2), 120–126.
+              </li>
+              <li>
+                <strong>Stallings, William.</strong> <em>Cryptography and Network Security: Principles and Practice</em>, 8th Edition, Pearson.
+              </li>
+              <li>
+                <strong>Menezes, A. J., Van Oorschot, P. C., & Vanstone, S. A.</strong> <em>Handbook of Applied Cryptography</em>, CRC Press.
+              </li>
+              <li>
+                <strong>RFC 8017 (PKCS #1 v2.2):</strong> "RSA Cryptography Specifications Version 2.2", Internet Engineering Task Force (IETF), 2016.
+              </li>
+              <li>
+                <strong>NIST SP 800-56B Rev. 2:</strong> "Recommendation for Pair-Wise Key-Establishment Schemes Using Integer Factorization Cryptography", National Institute of Standards and Technology.
+              </li>
+            </ul>
+          </article>
+        </section>
+
+        <p class="footer-note">
+          Cryptography & System Security Virtual Laboratory · Educational Asymmetric Encryption Simulator
         </p>
 
-        <div id="rsaAnimation" class="rsa-animation">
-
-          <div class="sim-message" id="plainBox">
-            <span class="sim-label">PLAINTEXT</span>
-            <div id="simPlaintext" class="sim-value">HELLO RSA</div>
-          </div>
-
-          <div class="sim-arrow" id="arrow1">→</div>
-
-          <div class="sim-stage" id="encryptBox">
-            <span class="sim-label">RSA ENCRYPTION</span>
-            <div class="key-display">
-              Public Key
-              <strong id="simPublicKey">(17, 3233)</strong>
-            </div>
-            <div class="formula">c = m<sup>e</sup> mod n</div>
-            <div id="encryptionParticle" class="particle">●</div>
-          </div>
-
-          <div class="sim-arrow" id="arrow2">→</div>
-
-          <div class="sim-message" id="cipherBox">
-            <span class="sim-label">CIPHERTEXT</span>
-            <div id="simCiphertext" class="sim-value">—</div>
-          </div>
-
-          <div class="sim-arrow" id="arrow3">→</div>
-
-          <div class="sim-stage" id="decryptBox">
-            <span class="sim-label">RSA DECRYPTION</span>
-            <div class="key-display">
-              Private Key
-              <strong id="simPrivateKey">(2753, 3233)</strong>
-            </div>
-            <div class="formula">m = c<sup>d</sup> mod n</div>
-            <div id="decryptionParticle" class="particle">●</div>
-          </div>
-
-          <div class="sim-arrow" id="arrow4">→</div>
-
-          <div class="sim-message" id="recoveredBox">
-            <span class="sim-label">RECOVERED MESSAGE</span>
-            <div id="simRecovered" class="sim-value">—</div>
-          </div>
-        </div>
-
-        <div class="simulation-controls">
-          <button type="button" class="primary" id="startSimulation">
-            ▶ Start Simulation
-          </button>
-          <button type="button" class="secondary" id="resetSimulation">
-            ↻ Reset
-          </button>
-        </div>
-
-        <div id="simulationStep" class="status" aria-live="polite">
-          Generate keys in the Interactive Lab, then start the simulation.
-        </div>
-      </article>
-
-      <article class="card" style="margin-top:18px">
-        <h3>What the animation represents</h3>
-        <div class="formula">
-          Plaintext → Public-key encryption → Ciphertext
-          → Private-key decryption → Original message
-        </div>
-        <ol class="steps">
-          <li>The simulation reads the current message and RSA keys from the Interactive Lab.</li>
-          <li>Each UTF-8 byte is represented by an integer <code>m</code>.</li>
-          <li>RSA encryption calculates <code>c = m<sup>e</sup> mod n</code>.</li>
-          <li>The ciphertext values are then decrypted using <code>m = c<sup>d</sup> mod n</code>.</li>
-          <li>The recovered bytes are converted back into the original plaintext.</li>
-        </ol>
-      </article>
-    </section>
-
-    <section id="assessment" class="panel">
-      <div class="grid">
-        <article class="card">
-          <h2>Evaluation Questions</h2>
-          <ol class="steps">
-            <li>What is the purpose of selecting two prime numbers in RSA?</li>
-            <li>How is <code>φ(n)</code> calculated for the two-prime RSA setup?</li>
-            <li>What mathematical relationship must hold between <code>e</code> and <code>φ(n)</code>?</li>
-            <li>How is <code>d</code> obtained from <code>e</code> and <code>φ(n)</code>?</li>
-            <li>Which key is used for encryption in this experiment and which key is used for decryption?</li>
-            <li>Why must the message integer be smaller than <code>n</code>?</li>
-          </ol>
-        </article>
-        <article class="card">
-          <h2>Test Cases</h2>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Test</th><th>p</th><th>q</th><th>e</th><th>Input</th><th>Expected</th></tr></thead>
-              <tbody>
-                <tr><td>1</td><td>61</td><td>53</td><td>17</td><td>HELLO</td><td>Decrypted output = HELLO</td></tr>
-                <tr><td>2</td><td>61</td><td>53</td><td>Auto</td><td>RSA</td><td>Decrypted output = RSA</td></tr>
-                <tr><td>3</td><td>47</td><td>71</td><td>79</td><td>TEST</td><td>Decrypted output = TEST</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </article>
       </div>
-    </section>
+    </main>
+  </div>
 
-    <section id="quiz" class="panel">
-      <article class="card">
-        <h2>Quiz</h2>
-        <form id="quizForm">
-          <div class="quiz-q"><strong>1. Which key is normally shared openly?</strong>
-            <label class="option"><input type="radio" name="q1" value="a"> Private key</label>
-            <label class="option"><input type="radio" name="q1" value="b"> Public key</label>
-            <label class="option"><input type="radio" name="q1" value="c"> φ(n)</label>
-          </div>
-          <div class="quiz-q"><strong>2. If p = 5 and q = 11, what is n?</strong>
-            <label class="option"><input type="radio" name="q2" value="a"> 16</label>
-            <label class="option"><input type="radio" name="q2" value="b"> 55</label>
-            <label class="option"><input type="radio" name="q2" value="c"> 44</label>
-          </div>
-          <div class="quiz-q"><strong>3. What does d represent?</strong>
-            <label class="option"><input type="radio" name="q3" value="a"> The modular inverse of e modulo φ(n)</label>
-            <label class="option"><input type="radio" name="q3" value="b"> p + q</label>
-            <label class="option"><input type="radio" name="q3" value="c"> The ciphertext</label>
-          </div>
-          <div class="quiz-q"><strong>4. Which operation is used to encrypt m?</strong>
-            <label class="option"><input type="radio" name="q4" value="a"> m + e</label>
-            <label class="option"><input type="radio" name="q4" value="b"> m × e</label>
-            <label class="option"><input type="radio" name="q4" value="c"> m<sup>e</sup> mod n</label>
-          </div>
-          <div class="quiz-q"><strong>5. Why is this small RSA simulator not suitable for real security?</strong>
-            <label class="option"><input type="radio" name="q5" value="a"> It uses toy-sized parameters and simplified textbook RSA</label>
-            <label class="option"><input type="radio" name="q5" value="b"> RSA cannot encrypt messages</label>
-            <label class="option"><input type="radio" name="q5" value="c"> Public keys cannot be generated</label>
-          </div>
-          <button type="button" class="primary" id="quizBtn">Submit Quiz</button>
-          <div id="quizScore" class="score"></div>
-        </form>
-      </article>
-    </section>
-
-    <section id="references" class="panel">
-      <article class="card">
-        <h2>References</h2>
-        <ul class="steps">
-          <li>R. L. Rivest, A. Shamir, L. Adleman, “A Method for Obtaining Digital Signatures and Public-Key Cryptosystems,” Communications of the ACM, 1978.</li>
-          <li>William Stallings, <em>Cryptography and Network Security: Principles and Practice</em>.</li>
-          <li>National Institute of Standards and Technology (NIST), cryptographic standards and guidance: https://www.nist.gov/</li>
-        </ul>
-        <p><strong>Module implementation:</strong> plain HTML, CSS and JavaScript; no external library is required.</p>
-      </article>
-    </section>
-
-    <p class="footer-note">RSA Virtual Lab · Educational simulation · Use sufficiently small values for classroom demonstration.</p>
-  </main>
+  <!-- Lab Logic -->
   <script src="../../js/common.js"></script>
   <script src="script.js"></script>
-  <script src="animation.js"></script>
 </body>
 </html>
